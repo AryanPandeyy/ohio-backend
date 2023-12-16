@@ -5,6 +5,7 @@ import { mongoose } from "mongoose";
 export default function connectDB() {
   const url = process.env.DATABASE_URL;
   console.log("DOTENV: ", url);
+
   try {
     mongoose.connect(url);
   } catch (err) {
