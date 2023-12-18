@@ -1,4 +1,4 @@
-import { mongoose } from "mongoose";
+import { Mongoose, mongoose } from "mongoose";
 import { memberShipObj } from "./memberShip";
 import { documentObj } from "./document";
 
@@ -86,4 +86,5 @@ const userSchema = new mongoose.Schema({
   documentObj,
 });
 
-module.exports = userSchema;
+const User = Mongoose.Model("User", userSchema);
+export default User;
