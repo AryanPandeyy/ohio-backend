@@ -1,6 +1,6 @@
-import { Mongoose, mongoose } from "mongoose";
-import { memberShipObj } from "./memberShip";
-import { documentObj } from "./document";
+const mongoose = require("mongoose");
+const memberShipObj = require("./memberShip");
+const documentObj = require("./document");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -84,7 +84,15 @@ const userSchema = new mongoose.Schema({
   },
   memberShipObj,
   documentObj,
+  isApproved: {
+    type: Boolean,
+    default: false,
+  },
+  secretary: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Secretary",
+  },
 });
 
-const User = Mongoose.Model("User", userSchema);
-export default User;
+const User = mongoose.model("User", userSchema);
+module.exports = User;
