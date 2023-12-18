@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const memberShipObj = require("./memberShip");
 const documentObj = require("./document");
-
+const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema({
   name: {
     firstName: {
@@ -93,6 +93,13 @@ const userSchema = new mongoose.Schema({
     ref: "Secretary",
   },
 });
+
+userSchema.pre('save', async function(next){
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+
+})
+
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;
