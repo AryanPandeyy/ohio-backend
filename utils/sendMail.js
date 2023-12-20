@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 
+
 let message = {
   from: "example@gmail.com",
   to: `${user.secretaryEmail}`,

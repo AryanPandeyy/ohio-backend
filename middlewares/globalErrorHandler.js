@@ -9,4 +9,4 @@ const globalErrorHandler = (err, req, res, next) => {
   });
 };
 
-export default globalErrorHandler;
+module.exports =  globalErrorHandler;
