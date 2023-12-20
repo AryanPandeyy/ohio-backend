@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const memberShipObj = require("./memberShip");
 const documentObj = require("./document");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema({
   name: {
     firstName: {
@@ -92,14 +92,20 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Secretary",
   },
+  role: {
+    type: String,
+    enum: {
+      values: ["user", "admin", "super admin", "recording secretary"],
+      message: "user role should be user or guide or admin",
+    },
+    default: "user",
+  },
 });
 
-userSchema.pre('save', async function(next){
+userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 12);
   next();
-
-})
-
+});
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;
