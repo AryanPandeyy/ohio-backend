@@ -313,7 +313,19 @@ const isLoggedIn = async (req, res, next) => {
   }
 };
 
+const uploadFile = async (req, res, next) => {
+  try {
+    const postUrl = await uploadOnclould(path.join(__dirname, '..', 'public', 'temp', req.filename), false);
+    if (!postUrl) return next(new APPError('Please provide file name', 404));
+    req.body.url = postUrl;
+  } catch (err) {
+    return next(new APPError(err.message, 400));
+  }
+  next();
+};
+
 module.exports = {
+  uploadFile,
   signup,
   login,
   protect,
