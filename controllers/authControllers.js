@@ -8,25 +8,23 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const sendEmail = require('../utils/email');
 
-const signToken = (userId) => {
+const signToken = (user) => {
   //secret-key can be anything like - my-name-is-subhajit(min 32 char)
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN, //90d after jwt token will expire and user have to sign up agin if the signature
+  return jwt.sign({ userId: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN //90d after jwt token will expire and user have to sign up agin if the signature
     //correct also
   });
 };
 
 const createAndSendToken = (user, statusCode, res) => {
-  const token = signToken(user._id);
+  const token = signToken(user);
   //remove password from output
   if (user.password) user.password = undefined;
   const cookieOptions = {
     //in expires is saved as date in config file so we have to convert it into a mili second
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
+    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
 
-    httpOnly: true,
+    httpOnly: true
   };
 
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
@@ -36,29 +34,34 @@ const createAndSendToken = (user, statusCode, res) => {
     status: 'success',
     token,
     data: {
-      user: user,
-    },
+      user: user
+    }
   });
 };
 const signup = async (req, res, next) => {
-  try {
-    const newUser = await User.create(req.body);
+  const extractedBody = { ...req.body };
+  const userExist = await User.findOne({
+    email
+  });
 
-    const url = `${req.protocol}://${req.get('host')}/me`;
+  // if a user who's on hold, try to sign up again
+  if (userExist.isApproved === false) {
+    res.status(400).json({ message: 'Approval of user is on hold' });
+  }
 
-    const mailOptions = {
-      email: newUser.email,
-      subject: 'Email verified',
-      message: 'go to /registration',
-    };
+  if (userExist) {
+    res.status(409).json({ message: 'User already exist on given email address' });
+  } else {
     try {
-      await sendEmail(mailOptions);
+      const newUser = await User.create({
+        ...extractedBody
+      });
+      sendMail(newUser);
+      createAndSendToken(newUser, 201, res);
     } catch (err) {
-      console.log(err);
+      // general error left uncaught
+      console.log('ERROR: ', err);
     }
-    createAndSendToken(newUser, 201, res);
-  } catch (err) {
-    next(new APPError(err.message, 400));
   }
 };
 
@@ -92,10 +95,7 @@ const protect = async (req, res, next) => {
 
   try {
     let token;
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer')
-    ) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       /*authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MWNkMmVhYTE2MzYyMmQ3MTg5Y2MxYyIsImlhdCI6MTY5NjUyNDM3MSwiZXhwIjoxNzA0MzAwMzcxfQ.0Gq-COKiBO2BKvomDq0quMC22x8MpoRe6rBUt3ZV9YM',*/
       //the second one is token and we need the token only thats why we implemented split function
       token = req.headers.authorization.split(' ')[1];
@@ -103,9 +103,7 @@ const protect = async (req, res, next) => {
       token = req.cookies.jwt;
     }
     if (!token) {
-      return next(
-        new APPError('You are not logged in, please login to app first', 401)
-      );
+      return next(new APPError('You are not logged in, please login to app first', 401));
     }
     //promisifying  a function with the built in module of node js
     const verifyAsync = promisify(jwt.verify);
@@ -117,9 +115,7 @@ const protect = async (req, res, next) => {
      */
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
-      return next(
-        new APPError('User belonging to this token , no longer exists', 401)
-      );
+      return next(new APPError('User belonging to this token , no longer exists', 401));
     }
     /**
      * 4) check if the user changed the password after the token issued
@@ -143,9 +139,7 @@ const restrictTo = (...roles) => {
     //roles is an array ['admin', 'lead-guide']
     //as this middle ware runs after the protect middleware so we have acess to the req.user property
     if (!roles.includes(req.user.role)) {
-      return next(
-        new APPError('you do not have permission to access this routes', 403)
-      );
+      return next(new APPError('you do not have permission to access this routes', 403));
     }
     next();
   };
@@ -160,12 +154,7 @@ const forgotPassword = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-      return next(
-        new APPError(
-          'no user find with this email, please check your email',
-          404
-        )
-      );
+      return next(new APPError('no user find with this email, please check your email', 404));
     }
     // instances method always called on user
     //in the function we are only updating the property but not saved the changes in database, so we have to save the docu
@@ -177,9 +166,7 @@ const forgotPassword = async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     //4) send mail
-    const resetUrl = `${req.protocol}://${req.get(
-      'host'
-    )}/api/v1/users/resetPassword/${resetToken}`;
+    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
     console.log(`resrt url = ${resetUrl}`);
 
     const message = `Forgot your password? submit a patch request with your new password and passwordConfirm to:
@@ -189,17 +176,16 @@ const forgotPassword = async (req, res, next) => {
       await sendEmail({
         email: user.email,
         subject: 'Your password reset token (valid only for 10 min)',
-        message: message,
+        message: message
       });
     } catch (error) {
-      (user.passwordResetToken = undefined),
-        (user.passwordResetExpires = undefined);
+      (user.passwordResetToken = undefined), (user.passwordResetExpires = undefined);
       await user.save({ validateBeforeSave: false });
       return next(new APPError('there was an error sending the mail', 500));
     }
     res.status(200).json({
       status: 'success',
-      message: 'token sent to mail',
+      message: 'token sent to mail'
     });
   } catch (error) {
     return next(new APPError(error.message, 401));
@@ -210,13 +196,10 @@ const forgotPassword = async (req, res, next) => {
 const resetPassword = async (req, res, next) => {
   try {
     //1) get user based on token
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(req.params.token)
-      .digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
     const user = await User.findOne({
       passwordResetToken: hashedToken,
-      passwordResetExpires: { $gt: Date.now() },
+      passwordResetExpires: { $gt: Date.now() }
     });
     // if (Date.now() > user.passwordResetExpires) {
     //   return next(new APPError('Time expired'));
@@ -238,7 +221,7 @@ const resetPassword = async (req, res, next) => {
     const token = signToken(user._id);
     res.status(200).json({
       status: 'success',
-      token,
+      token
     });
   } catch (error) {
     return next(new APPError(error.message, 401));
@@ -269,10 +252,10 @@ const updatePassword = async (req, res, next) => {
 const logOut = (req, res, next) => {
   res.cookie('jwt', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true,
+    httpOnly: true
   });
   res.status(200).json({
-    status: 'success',
+    status: 'success'
   });
 };
 
@@ -283,10 +266,7 @@ const isLoggedIn = async (req, res, next) => {
     if (req.cookies.jwt) {
       const verifyAsync = promisify(jwt.verify);
 
-      const decoded = await verifyAsync(
-        req.cookies.jwt,
-        process.env.JWT_SECRET
-      );
+      const decoded = await verifyAsync(req.cookies.jwt, process.env.JWT_SECRET);
       const currentUser = await User.findById(decoded.id);
       if (!currentUser) {
         return next(new APPError('No one found with this Id', 404));
@@ -300,8 +280,8 @@ const isLoggedIn = async (req, res, next) => {
       res.status(200).json({
         status: 'success',
         data: {
-          user: currentUser,
-        },
+          user: currentUser
+        }
       });
     }
   } catch (err) {
@@ -318,5 +298,5 @@ module.exports = {
   resetPassword,
   updatePassword,
   isLoggedIn,
-  logOut,
+  logOut
 };
