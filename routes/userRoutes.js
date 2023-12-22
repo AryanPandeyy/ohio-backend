@@ -1,5 +1,5 @@
 const express = require('express');
-
+const {signup, verifyEmail} = require('../controllers/authControllers')
 const router = express.Router();
 router.get('/', (req, res) => {
   res.status(200).json({
@@ -7,7 +7,8 @@ router.get('/', (req, res) => {
   });
 });
 
-// router.post('/signup', signup);
+router.post('/verifyEmail', verifyEmail);
+router.post('/signup', signup);
 // router.post('/login', login);
 // router.get('/logout', logOut);
 // router.post('/forgotPassword', forgotPassword);

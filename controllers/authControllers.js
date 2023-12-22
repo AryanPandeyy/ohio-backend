@@ -40,14 +40,31 @@ const createAndSendToken = (user, statusCode, res) => {
     },
   });
 };
+
+const verifyEmail = async (req, res, next) => {
+  const { name, email } = req.body;
+  if(!email){
+    return next(new APPError("Please provide an email", 400));
+  }
+  const mailOptions = {
+    email,
+    subject: 'Email verified',
+    message: `hello ${name} go to /registration`,
+  };
+  try {
+    await sendEmail(mailOptions);
+    sendJsonRes(res, 200, null);
+  } catch (err) {
+    next(new APPError(err.message, 400));
+  }
+};
+
 const signup = async (req, res, next) => {
   try {
     const newUser = await User.create(req.body);
 
-    const url = `${req.protocol}://${req.get('host')}/me`;
-
     const mailOptions = {
-      email: newUser.email,
+      email: 'japamali56@gmail.com',
       subject: 'Email verified',
       message: 'go to /registration',
     };
@@ -310,6 +327,7 @@ const isLoggedIn = async (req, res, next) => {
 };
 
 module.exports = {
+  verifyEmail,
   signup,
   login,
   protect,

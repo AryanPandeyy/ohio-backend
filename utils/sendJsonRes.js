@@ -11,5 +11,5 @@ const sendJsonRes = (res, statusCode, data, options) => {
     res.status(statusCode).json(jsonObj);
   };
   
-export default sendJsonRes;
+module.exports = sendJsonRes;
   
