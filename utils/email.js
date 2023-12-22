@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-require("dotenv").config();
+require('dotenv').config();
 
 //development pulpose
 
@@ -11,8 +11,8 @@ const sendEmail = async (options) => {
     port: process.env.EMAIL_PORT,
     auth: {
       user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD,
-    },
+      pass: process.env.EMAIL_PASSWORD
+    }
   });
   //less secure development
   //2) define email options
@@ -20,7 +20,7 @@ const sendEmail = async (options) => {
     from: 'kundusubhajit72@gmail.com',
     to: options.email,
     subject: options.subject,
-    text: options.message,
+    text: options.message
     //html: options.html
   };
   //3) Actually send mail
@@ -28,4 +28,4 @@ const sendEmail = async (options) => {
   await transporter.sendMail(mailOptions);
 };
 
-module.exports = sendEmail;
+//module.exports = sendEmail;

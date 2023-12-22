@@ -1,15 +1,14 @@
 const sendJsonRes = (res, statusCode, data, options) => {
-    let jsonObj = {
-      status: true,
-      data: {
-        data,
-      },
-    };
-    if (options) {
-      jsonObj = { ...options, ...jsonObj };
+  let jsonObj = {
+    status: true,
+    data: {
+      data
     }
-    res.status(statusCode).json(jsonObj);
   };
-  
-export default sendJsonRes;
-  
+  if (options) {
+    jsonObj = { ...options, ...jsonObj };
+  }
+  res.status(statusCode).json(jsonObj);
+};
+
+module.exports = sendJsonRes;
