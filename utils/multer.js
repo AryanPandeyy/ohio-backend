@@ -1,4 +1,5 @@
-const Multer = require('multer');
+const multer = require('multer');
+const path = require('path');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -14,7 +15,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = Multer({
+const upload = multer({
   storage,
   limits: {
     // file size is in bytes
