@@ -4,9 +4,8 @@ const APPError = require('../utils/appError');
 const sendJsonRes = require('../utils/sendJsonRes');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-
-const crypto = require('crypto');
 const sendEmail = require('../utils/email');
+const crypto = require('crypto');
 
 const signToken = (user) => {
   //secret-key can be anything like - my-name-is-subhajit(min 32 char)
@@ -39,28 +38,31 @@ const createAndSendToken = (user, statusCode, res) => {
   });
 };
 const signup = async (req, res, next) => {
-  const extractedBody = { ...req.body };
   const userExist = await User.findOne({
-    email
+    email: req.body.email
   });
 
   // if a user who's on hold, try to sign up again
-  if (userExist.isApproved === false) {
+  if (userExist && userExist.isApproved === false) {
     res.status(400).json({ message: 'Approval of user is on hold' });
   }
+
+  const mailOptions = {
+    email: req.body.email,
+    subject: 'waiting for approval',
+    message: 'Thank you for submission waiting for approval'
+  };
 
   if (userExist) {
     res.status(409).json({ message: 'User already exist on given email address' });
   } else {
     try {
-      const newUser = await User.create({
-        ...extractedBody
-      });
-      sendMail(newUser);
+      const newUser = await User.create(req.body);
+      sendEmail(mailOptions);
       createAndSendToken(newUser, 201, res);
     } catch (err) {
       // general error left uncaught
-      console.log('ERROR: ', err);
+      next(new APPError(err.message, 400));
     }
   }
 };
