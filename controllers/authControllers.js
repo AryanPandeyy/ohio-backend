@@ -45,24 +45,23 @@ const signup = async (req, res, next) => {
   // if a user who's on hold, try to sign up again
   if (userExist && userExist.isApproved === false) {
     res.status(400).json({ message: 'Approval of user is on hold' });
-  }
-
-  const mailOptions = {
-    email: req.body.email,
-    subject: 'waiting for approval',
-    message: 'Thank you for submission waiting for approval'
-  };
-
-  if (userExist) {
-    res.status(409).json({ message: 'User already exist on given email address' });
   } else {
-    try {
-      const newUser = await User.create(req.body);
-      sendEmail(mailOptions);
-      createAndSendToken(newUser, 201, res);
-    } catch (err) {
-      // general error left uncaught
-      next(new APPError(err.message, 400));
+    if (userExist) {
+      res.status(409).json({ message: 'User already exist on given email address' });
+    } else {
+      try {
+        const newUser = await User.create(req.body);
+        const mailOptions = {
+          email: req.body.email,
+          subject: 'waiting for approval',
+          message: 'Thank you for submission waiting for approval'
+        };
+        sendEmail(mailOptions);
+        createAndSendToken(newUser, 201, res);
+      } catch (err) {
+        // general error left uncaught
+        next(new APPError(err.message, 400));
+      }
     }
   }
 };
