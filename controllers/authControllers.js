@@ -58,10 +58,10 @@ const signup = async (req, res, next) => {
 
   // if a user who's on hold, try to sign up again
   if (userExist && userExist.isApproved === false) {
-    res.status(400).json({ message: 'Approval of user is on hold' });
+    return next(new APPError('Your approval is on hold', 400));
   } else {
     if (userExist) {
-      res.status(409).json({ message: 'User already exist on given email address' });
+      return next(new APPError('User already exist on given email address', 409));
     } else {
       try {
         const newUser = await User.create(req.body);
