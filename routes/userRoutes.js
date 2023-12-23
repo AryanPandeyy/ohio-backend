@@ -1,7 +1,7 @@
 const express = require('express');
 const User = require('../models/userSchema');
 const otpGenerator = require('otp-generator');
-const { signup, login, uploadFile, protect } = require('../controllers/authControllers');
+const { signup, login, uploadFile, protect, verifyEmail } = require('../controllers/authControllers');
 const { sendOTPMail } = require('../utils/sendMail');
 
 const router = express.Router();
@@ -84,9 +84,10 @@ router.post('/confirm-otp/:userId', protect, async (req, res) => {
   }
 });
 
+
 router.post('/signup', signup);
 router.post('/login', login);
-router.post('/upload/file', uploadFile);
+router.post('/verifyEmail', verifyEmail);
 // router.get('/logout', logOut);
 // router.post('/forgotPassword', forgotPassword);
 // router.patch('/resetPassword/:token', resetPassword);
