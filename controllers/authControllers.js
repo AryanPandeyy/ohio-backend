@@ -70,7 +70,7 @@ const login = async (req, res, next) => {
       return next(new APPError('please provide email and password', 400));
     }
 
-    const user = await User.findOne({ email: email }).select('+password');
+    const user = await User.findOne({ 'email.primaryEmail': email }).select('+password');
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return next(new APPError(`Incorrect email or password`, 401));
