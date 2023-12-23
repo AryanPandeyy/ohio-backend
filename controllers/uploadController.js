@@ -1,8 +1,9 @@
 const upload = require('../utils/multer');
-const {uploadOnclould} = require('../utils/cloudinary');
-const path = require('path')
+const { uploadOnclould } = require('../utils/cloudinary');
+const path = require('path');
+const APPError = require('../utils/appError');
+
 const uploadFiles = upload.single('upload_file');
-const APPError = require('../utils/appError')
 const uploadToClould = async (req, res, next) => {
   try {
     const postUrl = await uploadOnclould(path.join(__dirname, '..', 'public', 'temp', req.filename), false);

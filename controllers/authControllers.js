@@ -5,7 +5,7 @@ const APPError = require('../utils/appError');
 const sendJsonRes = require('../utils/sendJsonRes');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { sendMail } = require('../utils/sendMail');
+const { sendMail, sendVerificationMail } = require('../utils/sendMail');
 const crypto = require('crypto');
 
 const signToken = (user) => {
@@ -38,6 +38,19 @@ const createAndSendToken = (user, statusCode, res) => {
     }
   });
 };
+
+const verifyEmail = async (req, res, next) => {
+  try {
+    await sendVerificationMail(req.body);
+    res.status(200).json({
+      status: true,
+      message: 'email sent succesfully'
+    });
+  } catch (err) {
+    next(new APPError(err.message, 400));
+  }
+};
+
 const signup = async (req, res, next) => {
   const userExist = await User.findOne({
     email: req.body.email
@@ -324,6 +337,7 @@ const uploadFile = async (req, res, next) => {
 };
 
 module.exports = {
+  verifyEmail,
   uploadFile,
   signup,
   login,

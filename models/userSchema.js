@@ -4,7 +4,7 @@ const documentObj = require('./document');
 const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    
       firstName: {
         required: true,
         type: String
@@ -15,8 +15,8 @@ const userSchema = new mongoose.Schema(
       lastName: {
         required: true,
         type: String
-      }
-    },
+      },
+    
     born: {
       required: true,
       type: Date
@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema(
       type: String
     },
 
-    address: {
+    
       mailingAddress: {
         required: true,
         type: String
@@ -65,13 +65,13 @@ const userSchema = new mongoose.Schema(
         required: true,
         type: String
       }
-    },
+    ,
     // https://stackoverflow.com/a/66383722
     phone: {
       required: true,
       type: Number
     },
-    email: {
+    
       primaryEmail: {
         required: true,
         type: String
@@ -80,7 +80,7 @@ const userSchema = new mongoose.Schema(
         required: true,
         type: String
       }
-    },
+    ,
     password: {
       required: true,
       type: String
