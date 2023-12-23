@@ -4,10 +4,10 @@ require('dotenv').config();
 const sendMail = async (user) => {
   const message = {
     from: 'margiaryan@gmail.com',
-    to: `${user.primaryEmail}`,
-    subject: `Approving  user having ${user.firstName} with ID ${user._id}✔` + Date.now(),
+    to: `${user.secretaryEmail}`,
+    subject: `Approving  user having name ${user.firstName}✔`,
     html: `<p><b>Hello</b></p>
-        <p>Approve this user ${user._id}</p>`
+        <p>Approve this user with userId ${user._id}</p>`
     // text: 'Hi from your nodemailer project'
   };
   console.log('USER, ', user);

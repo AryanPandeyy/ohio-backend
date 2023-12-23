@@ -29,10 +29,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       type: String
     },
-    adult: {
-      required: true,
-      type: String
-    },
+
     photo: {
       type: String
     },
@@ -97,7 +94,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       type: [String]
     },
-    documentObj,
+
     isApproved: {
       type: Boolean,
       default: false
