@@ -15,8 +15,10 @@ router.get('/', (req, res) => {
 router.post('/approve-user/:userId', protect, async (req, res) => {
   // userId is of user that is need to be approved
   const { userId } = req.params;
+
   //here user is either secretary or admin
-  const { user } = req.user;
+  const user = req.user;
+
   try {
     // Check if the user has the role of 'secretary'
     if (req.user.role !== 'secretary') {
@@ -28,7 +30,7 @@ router.post('/approve-user/:userId', protect, async (req, res) => {
       specialChars: false
     });
     const mailResponse = await sendOTPMail(
-      user.email,
+      user.email.primaryEmail,
       'Verification Email',
       `<h1>Please confirm your OTP</h1>
        <p>Here is your OTP code: ${otp}</p>`
@@ -36,7 +38,17 @@ router.post('/approve-user/:userId', protect, async (req, res) => {
     console.log('Email sent successfully: ', mailResponse);
     // Save the OTP and its expiration time in the secretary document
     const otpExpiration = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes expiration
-    await User.findByIdAndUpdate(user._id, { $set: { otp, otpExpiration } });
+    try {
+      console.log('ID ', user._id);
+      const debug = await User.updateOne(
+        { 'email.primaryEmail': user.email.primaryEmail },
+        { $set: { otp, otpExpiration } },
+        { upsert: true }
+      );
+      console.log('DEBUG AFTER OTP', debug);
+    } catch (err) {
+      console.log('ERROR SETTING USER ', err);
+    }
     res.json({ message: 'OTP sent to secretary for confirmation' });
   } catch (error) {
     console.error('Error approving user:', error);
@@ -48,9 +60,9 @@ router.post('/approve-user/:userId', protect, async (req, res) => {
 router.post('/confirm-otp/:userId', protect, async (req, res) => {
   try {
     const { userId } = req.params;
-    const { user } = req.user;
+    const user = req.user;
     const { enteredOTP } = req.body;
-
+    console.log('USER', user);
     // Retrieve the secretary's OTP and its expiration time
     const storedOTP = user.otp;
     const otpExpiration = user.otpExpiration;
@@ -60,7 +72,7 @@ router.post('/confirm-otp/:userId', protect, async (req, res) => {
       // remove the otp from secretary fields
       const secretary = await User.findByIdAndUpdate(user._id, { $unset: { otp: '', otpExpiration: '' } });
       // If the OTP is valid, update the user's status to 'approved' in the database
-      const updatedUser = await User.findByIdAndUpdate(userId, { status: 'approved' }, { new: true });
+      const updatedUser = await User.findByIdAndUpdate(userId, { isApproved: true });
 
       res.json({ message: 'User approved successfully', user: updatedUser });
     } else {

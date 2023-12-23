@@ -113,7 +113,12 @@ const userSchema = new mongoose.Schema(
       },
       default: 'user'
     },
-
+    otp: {
+      type: String
+    },
+    otpExpiration: {
+      type: Date
+    },
     //for recording secretary part(will update by rec-sec)
     recordingNumber: String,
     masterRecord: String,

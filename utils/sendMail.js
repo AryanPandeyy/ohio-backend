@@ -40,18 +40,16 @@ const sendOTPMail = async (email, title, body) => {
     // Create a Transporter to send emails
     let transporter = nodemailer.createTransport({
       service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
       auth: {
-        type: 'OAuth2',
-        user: process.env.MAIL_USERNAME,
-        pass: process.env.MAIL_PASSWORD,
-        clientId: process.env.OAUTH_CLIENTID,
-        clientSecret: process.env.OAUTH_CLIENT_SECRET,
-        refreshToken: process.env.OAUTH_REFRESH_TOKEN
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD
       }
     });
     // Send emails to users
     let info = await transporter.sendMail({
-      from: 'example@gmail.com',
+      from: 'margiaryan@gmail.com',
       to: email,
       subject: title,
       html: body

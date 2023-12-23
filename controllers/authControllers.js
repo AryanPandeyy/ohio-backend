@@ -10,7 +10,7 @@ const crypto = require('crypto');
 
 const signToken = (user) => {
   //secret-key can be anything like - my-name-is-subhajit(min 32 char)
-  return jwt.sign({ userId: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN //90d after jwt token will expire and user have to sign up agin if the signature
     //correct also
   });
@@ -107,10 +107,12 @@ const protect = async (req, res, next) => {
     //check if the payload is altered or not, decoded jwt will have have id of that particular user
     //which we are trying to access
     const decoded = await verifyAsync(token, process.env.JWT_SECRET);
+
     /**
      * 3) if the user is still present or not
      */
     const currentUser = await User.findById(decoded.id);
+
     if (!currentUser) {
       return next(new APPError('User belonging to this token , no longer exists', 401));
     }
