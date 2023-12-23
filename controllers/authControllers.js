@@ -22,9 +22,9 @@ const createAndSendToken = (user, statusCode, res) => {
   if (user.password) user.password = undefined;
   const cookieOptions = {
     //in expires is saved as date in config file so we have to convert it into a mili second
-    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
+    expires: process.env.JWT_COOKIE_EXPIRES_IN,
 
-    httpOnly: true
+    httpsOnly: true
   };
 
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
