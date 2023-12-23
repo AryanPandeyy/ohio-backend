@@ -4,23 +4,27 @@ const documentObj = require('./document');
 const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema(
   {
-    
-      firstName: {
-        required: true,
-        type: String
-      },
-      middleName: {
-        type: String
-      },
-      lastName: {
-        required: true,
-        type: String
-      },
-    
+    firstName: {
+      required: true,
+      type: String
+    },
+    middleName: {
+      type: String
+    },
+    lastName: {
+      required: true,
+      type: String
+    },
+
     born: {
       required: true,
       type: Date
     },
+    personType: {
+      required: true,
+      type: String
+    },
+
     sex: {
       required: true,
       type: String
@@ -41,46 +45,43 @@ const userSchema = new mongoose.Schema(
       type: String
     },
 
-    
-      mailingAddress: {
-        required: true,
-        type: String
-      },
-      mailingAddress2: {
-        type: String
-      },
-      mailingCity: {
-        required: true,
-        type: String
-      },
-      county: {
-        required: true,
-        type: String
-      },
-      mailingState: {
-        required: true,
-        type: String
-      },
-      mailingPostalCode: {
-        required: true,
-        type: String
-      }
-    ,
+    mailingAddress: {
+      required: true,
+      type: String
+    },
+    SecMailingAddress: {
+      type: String
+    },
+    mailingCity: {
+      required: true,
+      type: String
+    },
+    county: {
+      required: true,
+      type: String
+    },
+    mailingState: {
+      required: true,
+      type: String
+    },
+    postalCode: {
+      required: true,
+      type: String
+    },
     // https://stackoverflow.com/a/66383722
-    phone: {
+    mobileNo: {
       required: true,
       type: Number
     },
-    
-      primaryEmail: {
-        required: true,
-        type: String
-      },
-      secondaryEmail: {
-        required: true,
-        type: String
-      }
-    ,
+
+    primaryEmail: {
+      required: true,
+      type: String
+    },
+    secondaryEmail: {
+      required: true,
+      type: String
+    },
     password: {
       required: true,
       type: String
