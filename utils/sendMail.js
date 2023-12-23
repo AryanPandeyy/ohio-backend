@@ -1,28 +1,27 @@
 const nodemailer = require('nodemailer');
+require('dotenv').config();
 
-const sendMail = (user) => {
-  let message = {
-    from: 'example@gmail.com',
-    to: `${user.membership.secretaryEmail}`,
-    subject: `Approving  user having ${user.firstName} with ID ${user._id}✔` + Date.now(),
+const sendMail = async (user) => {
+  const message = {
+    from: 'margiaryan@gmail.com',
+    to: `${user.email.primaryEmail}`,
+    subject: `Approving  user having ${user.name.firstName} with ID ${user._id}✔` + Date.now(),
     html: `<p><b>Hello</b></p>
         <p>Approve this user ${user._id}</p>`
     // text: 'Hi from your nodemailer project'
   };
-
-  let transporter = nodemailer.createTransport({
+  console.log('USER, ', user);
+  const transporter = nodemailer.createTransport({
     service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
     auth: {
-      type: 'OAuth2',
-      user: process.env.MAIL_USERNAME,
-      pass: process.env.MAIL_PASSWORD,
-      clientId: process.env.OAUTH_CLIENTID,
-      clientSecret: process.env.OAUTH_CLIENT_SECRET,
-      refreshToken: process.env.OAUTH_REFRESH_TOKEN
+      user: process.env.EMAIL_USERNAME,
+      pass: process.env.EMAIL_PASSWORD
     }
   });
 
-  transporter.sendMail(message, (error, info) => {
+  await transporter.sendMail(message, (error, info) => {
     if (error) {
       console.log('Error occurred');
       console.log(error.message);

@@ -1,10 +1,11 @@
 const { promisify } = require('util');
+require('dotenv').config();
 const User = require('../models/userSchema');
 const APPError = require('../utils/appError');
 const sendJsonRes = require('../utils/sendJsonRes');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const sendEmail = require('../utils/email');
+const { sendMail } = require('../utils/sendMail');
 const crypto = require('crypto');
 
 const signToken = (user) => {
@@ -51,12 +52,7 @@ const signup = async (req, res, next) => {
     } else {
       try {
         const newUser = await User.create(req.body);
-        const mailOptions = {
-          email: req.body.email,
-          subject: 'waiting for approval',
-          message: 'Thank you for submission waiting for approval'
-        };
-        sendEmail(mailOptions);
+        await sendMail(newUser);
         createAndSendToken(newUser, 201, res);
       } catch (err) {
         // general error left uncaught
