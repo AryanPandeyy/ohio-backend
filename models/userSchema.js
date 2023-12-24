@@ -81,7 +81,8 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       required: true,
-      type: String
+      type: String,
+      select: false
     },
     secretaryEmail: {
       required: true,

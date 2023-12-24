@@ -9,7 +9,7 @@ const { sendMail, sendVerificationMail } = require('../utils/sendMail');
 const crypto = require('crypto');
 
 const signToken = (user) => {
-  //secret-key can be anything like - my-name-is-subhajit(min 32 char)
+  
   return jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN //90d after jwt token will expire and user have to sign up agin if the signature
     //correct also
@@ -83,10 +83,13 @@ const login = async (req, res, next) => {
       return next(new APPError('please provide email and password', 400));
     }
 
-    const user = await User.findOne({ 'email.primaryEmail': email }).select('+password');
+    const user = await User.findOne({ primaryEmail: email }).select('+password');
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return next(new APPError(`Incorrect email or password`, 401));
+    }
+    if(user && user.isApproved === false){
+      return next(new APPError(`Your registration is currently on hold for verification`, 403));
     }
 
     createAndSendToken(user, 200, res);
