@@ -107,8 +107,8 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: {
-        values: ['user', 'admin', 'super admin', 'recording secretary'],
-        message: 'role should be either user or admin or super admin or recording secretary'
+        values: ['user', 'admin', 'super admin', 'secretary'],
+        message: 'role should be either user or admin or super admin or secretary'
       },
       default: 'user'
     },

@@ -3,13 +3,11 @@ const User = require('../models/userSchema');
 const otpGenerator = require('otp-generator');
 const { signup, login, uploadFile, protect, verifyEmail } = require('../controllers/authControllers');
 const { sendOTPMail } = require('../utils/sendMail');
+const { getAllUsers } = require('../controllers/userController');
+const APPError = require('../utils/appError');
 
 const router = express.Router();
-router.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Hello from user router'
-  });
-});
+
 
 // Route to approve a user by a secretary
 router.post('/approve-user/:userId', protect, async (req, res) => {
@@ -37,11 +35,11 @@ router.post('/approve-user/:userId', protect, async (req, res) => {
     );
     console.log('Email sent successfully: ', mailResponse);
     // Save the OTP and its expiration time in the secretary document
-    const otpExpiration = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes expiration
+    const otpExpiration = new Date(Date.now() + 5 * 60 * 1000); // 2 minutes expiration
     try {
       console.log('ID ', user._id);
       const debug = await User.updateOne(
-        { 'email.primaryEmail': user.email.primaryEmail },
+        { primaryEmail: user.primaryEmail },
         { $set: { otp, otpExpiration } },
         { upsert: true }
       );
@@ -49,10 +47,10 @@ router.post('/approve-user/:userId', protect, async (req, res) => {
     } catch (err) {
       console.log('ERROR SETTING USER ', err);
     }
-    res.json({ message: 'OTP sent to secretary for confirmation' });
+    res.status(200).json({ status: true, message: 'OTP sent to secretary for confirmation' });
   } catch (error) {
     console.error('Error approving user:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ status: false, message: 'Internal Server Error' });
   }
 });
 
@@ -84,7 +82,6 @@ router.post('/confirm-otp/:userId', protect, async (req, res) => {
   }
 });
 
-
 router.post('/signup', signup);
 router.post('/login', login);
 router.post('/verifyEmail', verifyEmail);
@@ -110,9 +107,6 @@ router.post('/verifyEmail', verifyEmail);
 // router.get('/myTours', getBookedTours);
 // router.delete('/deleteMe', deleteMe);
 
-// //rest format routes
-// router.use(restrictTo('admin'));
-
-// router.route('/').get(getAllUsers).post(createUser);
+router.route('/').get(protect, getAllUsers);
 // router.route('/:id').get(getSpecificUser).patch(updateUser).delete(deleteUser);
 module.exports = router;
