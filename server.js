@@ -5,12 +5,16 @@ const globalErrorHandler = require('./middlewares/globalErrorHandler');
 const userRouter = require('./routes/userRoutes');
 const uploadRouter = require('./routes/fileRoutes');
 const upload = require('./utils/multer');
+const cookieParser = require('cookie-parser')
 
 const app = express();
+
 const corsOption = {
   origin: ['http://localhost:3000', 'http://localhost:5173'],
   credentials: true
 };
+
+app.use(cookieParser())
 
 app.use(cors(corsOption));
 app.use(express.json());
