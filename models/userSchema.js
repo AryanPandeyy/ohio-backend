@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const memberShipObj = require('./memberShip');
-const documentObj = require('./document');
 const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema(
   {

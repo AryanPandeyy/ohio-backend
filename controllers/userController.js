@@ -15,20 +15,29 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
-const updateUser = async (req, res, next)=>{
-  const {userId} = req.params;
+const updateUser = async (req, res, next) => {
+  const { userId } = req.params;
+  console.log(userId);
 
   try {
     const updatedUser = await User.findByIdAndUpdate(userId, req.body, {
       new: true,
       runValidators: true
-    })
-    sendJsonRes(res, 200, updatedUser)
-  
+    });
+    sendJsonRes(res, 200, updatedUser);
   } catch (err) {
     next(new APPError(err.message, 400));
-    
   }
-}
+};
+const deleteUser = async (req, res, next) => {
+  const { userId } = req.params;
 
-module.exports = { getAllUsers, updateUser };
+  try {
+    const updatedUser = await User.findByIdAndDelete(userId);
+    sendJsonRes(res, 204, null);
+  } catch (err) {
+    next(new APPError(err.message, 400));
+  }
+};
+
+module.exports = { getAllUsers, updateUser, deleteUser };
