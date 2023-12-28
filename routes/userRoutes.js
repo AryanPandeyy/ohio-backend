@@ -3,24 +3,20 @@ const User = require('../models/userSchema');
 const otpGenerator = require('otp-generator');
 const { signup, login, uploadFile, protect, verifyEmail } = require('../controllers/authControllers');
 const { sendOTPMail } = require('../utils/sendMail');
-const { getAllUsers } = require('../controllers/userController');
+const { getAllUsers, updateUser, deleteUser } = require('../controllers/userController');
 const APPError = require('../utils/appError');
 
 const router = express.Router();
 
-
 // Route to approve a user by a secretary
-router.post('/approve-user/:userId', protect, async (req, res) => {
-  // userId is of user that is need to be approved
-  const { userId } = req.params;
-
+router.post('/approve-user', protect, async (req, res, next) => {
   //here user is either secretary or admin
   const user = req.user;
 
   try {
     // Check if the user has the role of 'secretary'
     if (req.user.role !== 'secretary') {
-      return res.status(403).json({ message: 'Only secretaries can approve users' });
+      return next(new APPError('Only secretary can perform this function'));
     }
     const otp = otpGenerator.generate(6, {
       lowerCaseAlphabets: false,
@@ -28,21 +24,17 @@ router.post('/approve-user/:userId', protect, async (req, res) => {
       specialChars: false
     });
     const mailResponse = await sendOTPMail(
-      user.email.primaryEmail,
+      user.primaryEmail,
       'Verification Email',
       `<h1>Please confirm your OTP</h1>
        <p>Here is your OTP code: ${otp}</p>`
     );
     console.log('Email sent successfully: ', mailResponse);
     // Save the OTP and its expiration time in the secretary document
-    const otpExpiration = new Date(Date.now() + 5 * 60 * 1000); // 2 minutes expiration
+    const otpExpiration = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiration
     try {
       console.log('ID ', user._id);
-      const debug = await User.updateOne(
-        { primaryEmail: user.primaryEmail },
-        { $set: { otp, otpExpiration } },
-        { upsert: true }
-      );
+      const debug = await User.findByIdAndUpdate(req.user.id, { otp, otpExpiration }, { new: true });
       console.log('DEBUG AFTER OTP', debug);
     } catch (err) {
       console.log('ERROR SETTING USER ', err);
@@ -50,7 +42,7 @@ router.post('/approve-user/:userId', protect, async (req, res) => {
     res.status(200).json({ status: true, message: 'OTP sent to secretary for confirmation' });
   } catch (error) {
     console.error('Error approving user:', error);
-    res.status(500).json({ status: false, message: 'Internal Server Error' });
+    next(new APPError(error.message, 500));
   }
 });
 
@@ -68,17 +60,17 @@ router.post('/confirm-otp/:userId', protect, async (req, res) => {
     // Check if the entered OTP matches the stored OTP and is not expired
     if (enteredOTP === storedOTP && new Date() < new Date(otpExpiration)) {
       // remove the otp from secretary fields
-      const secretary = await User.findByIdAndUpdate(user._id, { $unset: { otp: '', otpExpiration: '' } });
+      const secretary = await User.findByIdAndUpdate(user._id, { otp: '', otpExpiration: '' });
       // If the OTP is valid, update the user's status to 'approved' in the database
       const updatedUser = await User.findByIdAndUpdate(userId, { isApproved: true });
 
-      res.json({ message: 'User approved successfully', user: updatedUser });
+      res.status(200).json({ status: true, message: 'User approved successfully' });
     } else {
-      res.status(400).json({ message: 'Invalid OTP or OTP expired' });
+      res.status(400).json({ status: false, message: 'Invalid OTP or OTP expired' });
     }
   } catch (error) {
     console.error('Error confirming OTP:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ status: false, message: 'Internal Server Error' });
   }
 });
 
@@ -106,7 +98,8 @@ router.post('/verifyEmail', verifyEmail);
 // );
 // router.get('/myTours', getBookedTours);
 // router.delete('/deleteMe', deleteMe);
+router.use(protect);
 
-router.route('/').get(protect, getAllUsers);
-// router.route('/:id').get(getSpecificUser).patch(updateUser).delete(deleteUser);
+router.route('/').get(getAllUsers);
+router.route('/:userId').patch(updateUser).delete(deleteUser);
 module.exports = router;

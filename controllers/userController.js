@@ -5,7 +5,7 @@ const sendJsonRes = require('../utils/sendJsonRes');
 const getAllUsers = async (req, res, next) => {
   try {
     let query = User.find();
-    if (req.user.role === 'secretary') {
+    if (req.user && req.user.role === 'secretary') {
       query = query.find({ secretaryEmail: req.user.primaryEmail });
     }
     const users = await query;
@@ -15,4 +15,29 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
-module.exports = { getAllUsers };
+const updateUser = async (req, res, next) => {
+  const { userId } = req.params;
+  console.log(userId);
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(userId, req.body, {
+      new: true,
+      runValidators: true
+    });
+    sendJsonRes(res, 200, updatedUser);
+  } catch (err) {
+    next(new APPError(err.message, 400));
+  }
+};
+const deleteUser = async (req, res, next) => {
+  const { userId } = req.params;
+
+  try {
+    const updatedUser = await User.findByIdAndDelete(userId);
+    sendJsonRes(res, 204, null);
+  } catch (err) {
+    next(new APPError(err.message, 400));
+  }
+};
+
+module.exports = { getAllUsers, updateUser, deleteUser };
