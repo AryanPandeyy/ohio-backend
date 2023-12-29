@@ -132,8 +132,16 @@ const userSchema = new mongoose.Schema(
     deceasedDate: Date
   },
   //automatically added createdAt and updatedAt filed to Schema
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+
+userSchema.virtual('documents', {
+  ref: 'Document',
+  foreignField: 'user',
+  localField: '_id',
+});
+
 
 // const userSchema = new mongoose.Schema({
 //   name: {

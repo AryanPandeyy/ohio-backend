@@ -39,5 +39,16 @@ const deleteUser = async (req, res, next) => {
     next(new APPError(err.message, 400));
   }
 };
+const getDocs = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).populate({
+      path: 'documents',
+      
+    }).select('primaryEmail');
+    sendJsonRes(res, 200, user);
+  } catch (err) {
+    next(new APPError(err.message, 400));
+  }
+};
 
-module.exports = { getAllUsers, updateUser, deleteUser };
+module.exports = { getAllUsers, updateUser, deleteUser, getDocs };

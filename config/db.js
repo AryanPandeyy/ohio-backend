@@ -1,25 +1,25 @@
-require("dotenv").config();
+require('dotenv').config();
 
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const connectDB = () => {
-  const url = process.env.DATABASE_URL;
-  console.log("DOTENV: ", url);
+  const url = process.env.DB;
+  console.log('DOTENV: ', url);
   if (url) {
     try {
       mongoose.connect(url);
     } catch (err) {
-      console.log("ERROR: ", err.message);
+      console.log('ERROR: ', err.message);
       process.exit(1);
     }
 
     const dbConnection = mongoose.connection;
-    dbConnection.once("open", () => {
-      console.log("Database connected");
+    dbConnection.once('open', () => {
+      console.log('Database connected');
     });
 
-    dbConnection.on("error", (err) => {
-      console.error("Connection error: ", err);
+    dbConnection.on('error', (err) => {
+      console.error('Connection error: ', err);
     });
   }
 };
