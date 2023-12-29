@@ -3,7 +3,7 @@ const User = require('../models/userSchema');
 const otpGenerator = require('otp-generator');
 const { signup, login, uploadFile, protect, verifyEmail } = require('../controllers/authControllers');
 const { sendOTPMail } = require('../utils/sendMail');
-const { getAllUsers, updateUser, deleteUser } = require('../controllers/userController');
+const { getAllUsers, updateUser, deleteUser, getDocs } = require('../controllers/userController');
 const APPError = require('../utils/appError');
 
 const router = express.Router();
@@ -99,6 +99,7 @@ router.post('/verifyEmail', verifyEmail);
 // router.get('/myTours', getBookedTours);
 // router.delete('/deleteMe', deleteMe);
 router.use(protect);
+router.get('/getDocs', getDocs);
 
 router.route('/').get(getAllUsers);
 router.route('/:userId').patch(updateUser).delete(deleteUser);

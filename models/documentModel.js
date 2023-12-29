@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const docModel = new mongoose.Schema({
   user: {
     type: mongoose.Schema.ObjectId,
-    required: true
+    required: true,
+    ref: 'User'
   },
   name: {
     type: String,

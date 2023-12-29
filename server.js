@@ -4,7 +4,7 @@ const cors = require('cors');
 const globalErrorHandler = require('./middlewares/globalErrorHandler');
 const userRouter = require('./routes/userRoutes');
 const uploadRouter = require('./routes/fileRoutes');
-const upload = require('./utils/multer');
+
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 

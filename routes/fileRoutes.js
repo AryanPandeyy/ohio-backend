@@ -3,6 +3,6 @@ const {uploadFiles, uploadToClould} = require('../controllers/uploadController')
 
 const router = express.Router();
 
-router.post('/', uploadFiles, uploadToClould);
+router.post('/:userId', uploadFiles, uploadToClould);
 
 module.exports = router;
