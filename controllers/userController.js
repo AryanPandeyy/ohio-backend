@@ -41,10 +41,11 @@ const deleteUser = async (req, res, next) => {
 };
 const getDocs = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).populate({
-      path: 'documents',
-      
-    }).select('primaryEmail');
+    const user = await User.findById(req.user.id)
+      .populate({
+        path: 'documents'
+      })
+      .select('primaryEmail');
     sendJsonRes(res, 200, user);
   } catch (err) {
     next(new APPError(err.message, 400));

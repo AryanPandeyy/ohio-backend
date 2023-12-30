@@ -1,5 +1,5 @@
 const cloudinary = require('cloudinary').v2;
-const {unlinkSync} = require('fs');
+const { unlinkSync } = require('fs');
 const path = require('path');
 require('dotenv').config();
 
@@ -22,7 +22,7 @@ const uploadOnclould = async (fileName, userphoto) => {
       url = await cloudinary.url(res.public_id, {
         width: 500,
         height: 500,
-        crop: 'fill'
+        crop: 'crop'
       });
       unlinkSync(fileName);
       return url;

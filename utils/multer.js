@@ -7,7 +7,7 @@ const storage = multer.diskStorage({
     cb(null, `${path.join(__dirname, '..', 'public', 'temp')}`);
   },
   filename: (req, file, cb) => {
-    // console.log(file);
+    console.log(file);
     //file = req.file
     const ext = file.mimetype.split('/')[1];
     req.filename = `user-${Date.now()}.${ext}`;
@@ -19,7 +19,7 @@ const upload = multer({
   storage,
   limits: {
     // file size is in bytes
-    fileSize: 500000
+    fileSize: 5000000
   }
 });
 module.exports = upload;
